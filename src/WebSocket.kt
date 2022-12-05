@@ -1,6 +1,7 @@
 package com.autumnsun
 
 object  WebSocket {
+    const val data="data"
     const val loginRequest = "{\"is_request\":true,\"id\":8,\"params\"" +
             ":[{\"username\":\"demo\",\"password\":\"123456\"}],\"method\":\"Authenticate\"}"
     const val homeRequest = "\"{\\\"is_request\\\":true,\\\"id\\\":5,\\\"params\\\":[{}],\\\"method\\\":\\\"GetControlList\\\"}"

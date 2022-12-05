@@ -1,6 +1,7 @@
 package com.autumnsun
 
 import com.autumnsun.model.message
+import com.google.gson.JsonObject
 import io.ktor.application.*
 import io.ktor.response.*
 import io.ktor.request.*
@@ -11,11 +12,15 @@ import io.ktor.websocket.*
 import io.ktor.http.cio.websocket.*
 import java.time.*
 import io.ktor.auth.*
+import io.ktor.client.*
 import io.ktor.gson.*
 import io.ktor.features.*
 import io.ktor.http.ContentType.Application.Json
+import io.ktor.serialization.*
 import io.ktor.util.Identity.encode
+import kotlinx.serialization.encodeToString
 import java.util.*
+import javax.swing.text.html.parser.Parser
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
@@ -39,9 +44,10 @@ fun Application.module(testing: Boolean = false) {
     }
 
     install(ContentNegotiation) {
-        gson {
-        }
+       json()
     }
+
+
 
     routing {
         get("/") {
@@ -59,6 +65,9 @@ fun Application.module(testing: Boolean = false) {
             println("login page!")
             val thisConnection = Connection(this)
             connections += thisConnection
+            val context="{\"is_request\":true,\"id\":8,\"params\"" +
+                    ":[{\"username\":\"demo\",\"password\":\"123456\"}],\"method\":\"Authenticate\"}"
+
 
             try {
 
@@ -66,14 +75,15 @@ fun Application.module(testing: Boolean = false) {
                 for (frame in incoming) {
                     frame as? Frame.Text ?: continue
                     val receivedText = frame.readText()
+                    send(WebSocket.loginResponse)
                     if(receivedText.equals(WebSocket.loginRequest, ignoreCase = true)){
                         send(
                             WebSocket.loginResponse
                         )
                     }else{
-                        close(CloseReason(CloseReason.Codes.PROTOCOL_ERROR,  "Invalid Request"))
+                        kotlinx.serialization.json.Json.encodeToString(message(false,"invalid message",0))
                     }
-                }
+               }
 
             } catch (e: Exception) {
                 println(e.localizedMessage)
@@ -96,7 +106,7 @@ fun Application.module(testing: Boolean = false) {
                             WebSocket.homeResponse
                         )
                     }else{
-                        close(CloseReason(CloseReason.Codes.PROTOCOL_ERROR,  "Invalid Request"))
+                        kotlinx.serialization.json.Json.encodeToString(message(false,"invalid message",0))
                     }
                 }
 
@@ -123,7 +133,7 @@ fun Application.module(testing: Boolean = false) {
                             WebSocket.lightResponse
                         )
                     }else
-                        close(CloseReason(CloseReason.Codes.PROTOCOL_ERROR,  "Invalid Request"))
+                        kotlinx.serialization.json.Json.encodeToString(message(false,"invalid message",0))
                 }
 
 
